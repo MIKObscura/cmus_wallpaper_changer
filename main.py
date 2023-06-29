@@ -33,9 +33,14 @@ if __name__=="__main__":
     try:
         set_bg(filename)
     except Exception:
-        system(F"gsettings set org.cinnamon.desktop.background picture-uri '{default_bg}'")
+        if filename.startswith('cue'):
+            new_filename = get_file_from_cue(filename)
+            try:
+                set_bg(new_filename)
+            except Exception:
+                system(F"gsettings set org.cinnamon.desktop.background picture-uri '{default_bg}'")
+        else:
+            system(F"gsettings set org.cinnamon.desktop.background picture-uri '{default_bg}'")
         with open("bg_logs.txt", "a") as log:
-            log.write(F"{filename} \n")
-            log.write(F"gsettings set org.cinnamon.desktop.background picture-uri '{default_bg}' \n")
             log.write(F"{filename} \n")
             log.write(F"gsettings set org.cinnamon.desktop.background picture-uri '{default_bg}' \n")
