@@ -28,19 +28,14 @@ def set_bg(filename):
         log.write(F"gsettings set org.cinnamon.desktop.background picture-uri \"file://{tmp_filename_bin}\" \n")
 
 if __name__=="__main__":
-    default_bg = 'file:///home/mikobscura/Pictures/wallpaper/oneshot.png'
+    default_bg = ''
     filename = argv[4]
     try:
         set_bg(filename)
     except Exception:
-        if filename.startswith('cue'):
-            new_filename = get_file_from_cue(filename)
-            try:
-                set_bg(new_filename)
-            except Exception:
-                system(F"gsettings set org.cinnamon.desktop.background picture-uri '{default_bg}'")
-        else:
-            system(F"gsettings set org.cinnamon.desktop.background picture-uri '{default_bg}'")
+        system(F"gsettings set org.cinnamon.desktop.background picture-uri '{default_bg}'")
         with open("bg_logs.txt", "a") as log:
+            log.write(F"{filename} \n")
+            log.write(F"gsettings set org.cinnamon.desktop.background picture-uri '{default_bg}' \n")
             log.write(F"{filename} \n")
             log.write(F"gsettings set org.cinnamon.desktop.background picture-uri '{default_bg}' \n")
