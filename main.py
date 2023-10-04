@@ -2,8 +2,9 @@
 from sys import argv
 from audio_metadata import load
 from pathlib import Path
-from os import path, system
+from os import path, system, environ
 from subprocess import check_output
+import dbus
 
 def get_file_from_cue(filename):
     slashes = [index for index, value in enumerate(filename) if value == '/']
@@ -21,10 +22,26 @@ def set_bg(filename):
     tmp_filename_bin = path.join(path.abspath("/tmp"), "wallpaper.jpeg")
     with open(tmp_filename_bin, "wb") as f:
         f.write(cover)
-    system(F"gsettings set org.cinnamon.desktop.background picture-uri \"file://{tmp_filename_bin}\"")
-    with open("bg_logs.txt", "a") as log:
+    if environ['XDG_CURRENT_DESKTOP'] == 'KDE':
+        script = """var Desktops = desktops();
+        for (i=0;i<Desktops.length;i++) {
+                d = Desktops[i];
+                d.wallpaperPlugin = "org.kde.image";
+                d.currentConfigGroup = Array("Wallpaper", "org.kde.image", "General");
+                d.writeConfig("Image", "file://%s");
+            }
+        """
+        bus = dbus.SessionBus()
+        plasma_bus = dbus.Interface(bus.get_object('org.kde.plasmashell', '/PlasmaShell'), dbus_interface='org.kde.PlasmaShell')
+        plasma_bus.evaluateScript(script % tmp_filename_bin)
         log.write(F"{filename} \n")
-        log.write(F"gsettings set org.cinnamon.desktop.background picture-uri \"file://{tmp_filename_bin}\" \n")
+        log.write(script % tmp_filename_bin)
+        log.write("\n")
+    else:
+        system(F"gsettings set org.cinnamon.desktop.background picture-uri \"file://{tmp_filename_bin}\"")
+        with open("bg_logs.txt", "a") as log:
+            log.write(F"{filename} \n")
+            log.write(F"gsettings set org.cinnamon.desktop.background picture-uri \"file://{tmp_filename_bin}\" \n")
 
 if __name__=="__main__":
     default_bg = ''
