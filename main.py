@@ -2,7 +2,8 @@
 from sys import argv
 from audio_metadata import load
 from pathlib import Path
-from os import path, system, environ
+from os import path, system, environ, urandom
+from binascii import b2a_hex
 from subprocess import check_output
 import dbus
 
@@ -19,7 +20,7 @@ def get_file_from_cue(filename):
 def set_bg(filename):
     meta = load(Path(filename))
     cover = meta["pictures"][0].data
-    tmp_filename_bin = path.join(path.abspath("/tmp"), "wallpaper.jpeg")
+    tmp_filename_bin = path.join(path.abspath("/tmp"), F"{b2a_hex(urandom(10)).decode('ascii')}.jpeg")
     with open(tmp_filename_bin, "wb") as f:
         f.write(cover)
     if environ['XDG_CURRENT_DESKTOP'] == 'KDE':
